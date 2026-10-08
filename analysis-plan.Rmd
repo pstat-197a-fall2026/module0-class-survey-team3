@@ -1,0 +1,44 @@
+---
+title: "Analysis Plan"
+date: "`r Sys.Date()`"
+output: pdf_document
+---
+
+# Question 1: Does programming-language preference relate to student’s domain interests? 
+Exact variables, files, and respondents included
+Variables: Programming language preference, domain interest
+Files: interest-clean.csv, background-clean.csv
+Data preparation needed
+Join files
+Summaries, plots, or models to try and what their output would tell you
+Bar chart with language on one axis and domain interests on the other
+Key choices to check, such as denominators, coding, scaling, or number of clusters
+How to treat students who put “no preference”
+Are we looking at each domain interest individually or common groupings/combinations?
+One limitation you will need to discuss
+There is a large variety of domain interests
+
+# Question 2: Do students who ranked themselves as more comfortable with programming, more likely to prefer R or Python?     
+Exact variables, files, and respondents included:
+Variables: Programming proficiency, Python vs R
+Files: interest-clean.csv, background-clean.csv
+Data preparation needed: combine the files
+Summaries, plots, or models to try and what their output would tell you: 	
+binary logistic regression, put 0 as python and 1 as R to see which categorical variable is preferred
+Bar chart with n per group. Each bar is one comfort level, splits the shares into preferring R, Python, or both. If the Python share increases as comfort rises, that indicates that more comfortable programmers lean towards Python or vice versa. 
+Key choices to check, such as denominators, coding, scaling, or number of clusters
+One limitation you will need to discuss: 
+There are a lot of no preferences for either r or python. ~25%
+
+# Question 3: Are students who ranked themselves as strong in statistics, mathematics, and computing more likely or less likely to select an ‘industry’ project as the project type that they want to work on?
+Exact variables, files, and respondents included
+Variables: Proficiency in math/stats/prog, Industry vs research preference
+Files: interest-clean.csv, background-clean.csv
+Data preparation needed
+Combine the files and check the language categories
+Summaries, plots, or models to try and what their output would tell you
+Scatter plot with average proficiency ratings plotted with project type preference
+Key choices to check, such as denominators, coding, scaling, or number of clusters
+Do we want to look at each proficiency rating (math, stats, prog), just one, or an average of the three?
+One limitation you will need to discuss
+Most people preferred industry so a lack of variation in responses might make the correlation less strong
