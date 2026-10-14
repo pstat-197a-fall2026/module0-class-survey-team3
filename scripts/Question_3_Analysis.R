@@ -42,3 +42,22 @@ barplot(
   ylab = "Proportion selecting industry",
   main = "Industry Project Preference by Self-Rated Proficiency"
 )
+
+combined_data$n_advanced <- 
+  (combined_data$prog.prof == "adv") +
+  (combined_data$math.prof == "adv") +
+  (combined_data$stat.prof == "adv")
+
+table(combined_data$n_advanced, combined_data$industry)
+
+# Logistic regression
+model <- glm(
+  industry ~ n_advanced,
+  data = combined_data,
+  family = binomial
+)
+
+summary(model)
+
+# Odds ratio
+exp(coef(model))
