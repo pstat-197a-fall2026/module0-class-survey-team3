@@ -32,9 +32,7 @@ According to the logistic regression model, prog.comf has a -0.4939 coefficient,
 
 
 ```{r}
-totals <- data %>%
-  group_by(prog.comf) %>%
-  summarize(n_total = n(), .groups = "drop")
+
 
 ggplot(data, aes(x = factor(prog.comf), fill = language)) + geom_bar(position = "fill", width = 0.6) +
   scale_y_continuous(labels = scales::percent_format()) + scale_fill_manual(
@@ -43,8 +41,6 @@ ggplot(data, aes(x = factor(prog.comf), fill = language)) + geom_bar(position = 
   labs(title = "Proportion of Language Preference by Programming Comfort",
     x = "Programming Comfort Level",
     y = "Percentage of Group") +
-  theme_minimal(base_size = 12) +
-  theme(plot.title = element_text(face = "bold", hjust = 0.5),
-    panel.grid.major.x = element_blank())
+  theme_minimal(base_size = 12) 
 ```
 This bar plot visually shows that the distribution of students who prefer python are definitely left skewed, while the distribution of students who prfer R are right skewed. This could support the idea that students who are more comfortable with programming prefer python over R.
