@@ -23,3 +23,8 @@ combined_data$all_strong <- dat$prog.prof == "adv" &
 # Cross-tabulation
 table(combined_data$all_strong, combined_data$industry)
 
+# Proportion choosing industry within each group
+prop.table(table(combined_data$all_strong, combined_data$industry), margin = 1)
+
+# Fisher's exact test
+fisher.test(table(combined_data$all_strong, combined_data$industry))
