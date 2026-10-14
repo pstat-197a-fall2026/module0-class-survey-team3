@@ -28,3 +28,17 @@ prop.table(table(combined_data$all_strong, combined_data$industry), margin = 1)
 
 # Fisher's exact test
 fisher.test(table(combined_data$all_strong, combined_data$industry))
+
+industry_prop <- tapply(
+  combined_data$industry,
+  combined_data$all_strong,
+  mean
+)
+
+barplot(
+  industry_prop,
+  names.arg = c("Not advanced\nin all 3", "Advanced\nin all 3"),
+  ylim = c(0, 1),
+  ylab = "Proportion selecting industry",
+  main = "Industry Project Preference by Self-Rated Proficiency"
+)
