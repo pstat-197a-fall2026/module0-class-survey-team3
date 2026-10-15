@@ -1,150 +1,69 @@
-# a number
-4.5
-# check structure
-str(4.5)
-# stored as double
-is.double(4.5)
-# an integer
-4L
-# check structure
-str(4L)
-# logical value
-TRUE
-# check structure
-str(TRUE)
-# arithmetic
-TRUE + FALSE
-# check structure
-str(FALSE + FALSE)
-# a character string
-'yay'
-# check structure
-str('yay')
-# string arithmetic won't work
-# '4' + '1'
+# Question 1: Does programming-language preference relate to domain interests?
 
-# but can be performed after converting character strings to numbers
-as.numeric('4') + as.numeric('1')
-# a factor
-factor(1, levels = c(1, 2), labels = c('blue', 'red'))
-# less verbose definition
-factor('blue', levels = c('blue', 'red'))
-# check structure
-str(factor('blue', levels = c('blue', 'red')))
+# join the datasets
+background <- read.csv("data/background-clean.csv")
+interest <- read.csv("data/interest-clean.csv")
+join <- merge(background, interest, by = "response_id")
 
 
-# numeric vector
-c(1, 4, 7)
-# character vector
-c('blue', 'red')
-# indexing
-c(1, 4, 7)[1]
-c(1, 4, 7)[2]
-c(1, 4, 7)[3]
-c(1, 4, 7)[2:3]
-c(1, 4, 7)[c(1, 3)]
+table(join$language)
+# No preference        Python             R 
+# 16                   22                11 
 
-# assign a name
-my_vec <- c(1, 4, 7)
 
-# check structure
-str(my_vec)
+# Split student's list of domain interests
+domain_list <- strsplit(join$domains, ", ", fixed = TRUE)
+domains <- sort(unique(unlist(domain_list)))
 
-# an array
-my_ary <- array(data = c(1, 2, 3, 4, 5, 6, 7, 8), 
-                dim = c(2, 4))
+# Proportion selecting each domain within each language group
+domain_prop <- sapply(domains, function(domain) {
+  selected <- sapply(domain_list, function(x) domain %in% x)
+  tapply(selected, join$language, mean)
+})
+round(domain_prop, 2)
 
-my_ary
-str(my_ary)
-# another array
-my_oth_ary <- array(data = c(1, 2, 3, 4, 5, 6, 7, 8), 
-                    dim = c(2, 2, 2))
+# Bar chart of domain interests by language preference
+old_par <- par(mar = c(5, 14, 4, 2))
+barplot(
+  domain_prop,
+  beside = T, horiz = T, las = 1,
+  col = c("red", "blue", "grey"),
+  xlim = c(0, 1),
+  xlab = "Proportion within language group",
+  main = "Domain Interests by Language Preference"
+)
+legend("topright", legend = rownames(domain_prop),
+       fill = c("red", "blue", "grey"), bty = "n", cex = 0.8)
+par(old_par)
 
-my_oth_ary
-str(my_oth_ary)
 
-# one element
-my_ary[1, 2]
-# one element
-my_oth_ary[1, 2, 1]
-# a slice (second row)
-my_ary[2, ]
-# a slice (first layer)
-my_oth_ary[ , , 1]
-# a list
-list('cat', c(1, 4, 7), TRUE)
-# a named list
-list(animal = 'cat',
-     numbers = c(1, 4, 7),
-     short = TRUE)
-# assign a name
-my_lst <- list(animal = 'cat',
-               numbers = c(1, 4, 7),
-               short = TRUE)
+# Count how many domains each student selected and save it as n_domains
+join$n_domains <- lengths(domain_list)
 
-# check structure
-str(my_lst)
+#average number of domains selected for each language group
+aggregate(n_domains ~ language, data = join, FUN = mean)
+#median of domains selected for each language
+aggregate(n_domains ~ language, data = join, FUN = median)
 
-# retrieve an element
-my_lst[[1]]
 
-# equivalent
-my_lst$animal
-
-# a data frame
-my_df <- data.frame(animal = c('cat', 'hare', 'tortoise'),
-                    has.fur = c(TRUE, TRUE, FALSE),
-                    weight.lbs = c(9.1, 8.2, 22.7))
-
-str(my_df)
-my_df
+# Compare the distribution of domain counts across language groups
+boxplot(
+  n_domains ~ language, data = join,
+  col = c("red", "blue", "grey"),
+  xlab = "Language preference", ylab = "Number of domains selected",
+  main = "Breadth of Interests by Language Preference"
+)
 
 
 
+# RESULTS
+# 49 students in total: No preference = 16, Python = 22, R = 11.
+# Mean domains selected for each preferred language: No preference = 5.06, Python = 3.95, R = 3.36.
+# Median domains selected for each preferred language: No preference = 5, Python = 4, R = 4.
+# Domain counts differ across groups; No preference has the highest average.(from box plot)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-library(tidyverse)
-
-# Load the current class data from this repository.
-background <- read_csv('data/background-clean.csv', show_col_types = FALSE)
-interest <- read_csv('data/interest-clean.csv', show_col_types = FALSE)
-metadata <- read_csv('data/survey-metadata.csv', show_col_types = FALSE)
-
-# CSVs store proficiency labels as text; define their order explicitly.
-background <- background %>%
-  mutate(across(ends_with('.prof'),
-                ~ factor(.x, levels = c('beg', 'int', 'adv'), ordered = TRUE)))
-
-nrow(background)
-
-nrow(interest)
-
-# print the data frame for inspection in the console
-background
-
-# In the RStudio Console, run View(background) to open the data viewer.
-
-metadata %>%
-  filter(data.file == 'background-clean.csv') %>%
-  select(variable.name, variable.description, variable.type, values.notes)
-
-my_df %>% STEP1() %>% STEP2() %>% STEP3()
-
-# a familiar example
-my_vec <- c(1, 2, 5) 
-str(my_vec)
-
-# use the pipe operator instead
-my_vec %>% str()
+#INSIGHT
+#students with no language preference may have a broader range of domain interests.
+#evidence 1: The No preference group selected an average of 5.06 domains, compared with 3.95 for Python and 3.36 for R.
+#evidence 2: From our data, the students with no preferred language shows higher interest in public health, biology, and social or political science. 
+#However, this pattern is not as strong for hot domain like Technology and Soft ware development, which have high portion of students from all three language group. 
