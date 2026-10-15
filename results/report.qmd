@@ -1,8 +1,8 @@
 ---
 title: "Analysis of class surveys"
-subtitle: "If you want a subtitle put it here"
-author: "List names here"
-date: last-modified
+subtitle: "Group 3"
+author: "Baichuan Peng, Pranavi Gandikota, Ryan Chang, Sami Gibson, Shiv Dutta"
+date: "10/15/2026""
 published-title: "Updated"
 editor: visual
 format: html
@@ -23,11 +23,23 @@ library(tidyverse)
 
 ## Executive summary
 
-Write a one-paragraph abstract summarizing what you did and your findings. It need not be comprehensive; try to highlight the most important or interesting outcomes.
+This report explores the relationship between students' academic backgrounds, self-reported proficiency, preferences for programming languages, and project interests using survey data collected from 49 students in PSTAT 197A. We focused on three main questions: whether programming language preference relates to domain interests, whether programming proficiency influences preference for R or Python, and whether students with higher proficiency in mathematics, statistics, and computing are more likely to prefer industry projects. Our results showed that students with no programming language preference tended to have a broader range of domain interests, while students who preferred Python generally reported higher programming proficiency than those who preferred R. We also found that students who rated themselves as advanced in all three subjects were slightly less likely to prefer industry projects, although this relationship was not statistically significant. Overall, our findings suggest some interesting patterns in student interests and preferences, but since the data comes from a small sample size and is self-reported the conclusions we can draw are limited.
 
 ## Data description
 
-Write a brief description of the dataset. Your description should cover how data were obtained, sample characteristics, and measurements taken. It does not need to be exhaustive, but sufficiently detailed to convey a clear high-level understanding of the dataset. You can utilize bullet points or tables if you feel it would help improve clarity.
+The dataset comes from the class survey conducted for the Data Science Capstone (PSTAT 197A) at the start of Fall 2026. The survey collected information about students' academic backgrounds, technical skills, and interests to better understand the experiences and preferences of students in the class.
+
+- **Sample:** Our analysis included responses from 49 students enrolled in the course. Since the survey was limited to students in one class, the sample may not be representative of the broader student population.
+
+- **Academic background:** Students provided information about their majors and academic backgrounds.
+
+- **Self-reported proficiency:** Students rated their own proficiency in programming, mathematics, and statistics. These ratings reflect students' own perceptions of their abilities rather than standardized assessments.
+
+- **Programming preferences:** Students indicated whether they preferred Python, R, or had no preference.
+
+- **Domain and project interests:** Students selected domains they were interested in (ex: public health, biology, technology, and social sciences). They also indicated their preference for industry or research projects.
+
+- **Data preparation:** The survey responses were organized into two cleaned datasets, `background-clean.csv` and `interest-clean.csv`.
 
 ## Questions of interest
 
