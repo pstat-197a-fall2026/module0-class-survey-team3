@@ -1,0 +1,46 @@
+---
+title: "question2"
+output: html_document
+---
+
+Question 2: Do students who ranked themselves as more comfortable with programming, more likely to prefer R or Python?    
+```{r}
+library(tidyverse)
+interest_data <- read.csv("/Users/ryanchang377/pstat197a/module0-class-survey-team3/data/interest-clean.csv")
+
+background_data <- read.csv("/Users/ryanchang377/pstat197a/module0-class-survey-team3/data/background-clean.csv")
+
+data <- inner_join(interest_data, background_data, by ="response_id")
+data
+
+data %>%
+  group_by(language) %>%
+  summarize(count = n(), mean_comfortability = mean(prog.comf, na.rm = TRUE), 
+            median_comfortability = median(prog.comf, na.rm = TRUE),
+            sd_comfortability = sd(prog.comf, na.rm = TRUE))
+
+```
+```{r}
+language_data <- data %>%
+  filter(language %in% c("Python", "R")) %>%
+  mutate(preferR = ifelse(language == "R", 1,0))
+
+logistic_model <- glm(preferR ~ prog.comf, data = language_data, family = binomial)
+summary(logistic_model)
+```
+According to the logistic regression model, prog.comf has a -0.4939 coefficient, meaning for every level increase of comfortability in programming, the log odds for preferring R over python shrinks by that much. While this would support the claim that students who are more comfortable programming prefer python over R, the p value (0.299) is much higher than 0.05, which means that this relationship is not statstically significant.
+
+
+```{r}
+
+
+ggplot(data, aes(x = factor(prog.comf), fill = language)) + geom_bar(position = "fill", width = 0.6) +
+  scale_y_continuous(labels = scales::percent_format()) + scale_fill_manual(
+    values = c("Python" = "blue", "R" = "red", "No preference" = "grey"),
+    name = "Language Preference") +
+  labs(title = "Proportion of Language Preference by Programming Comfort",
+    x = "Programming Comfort Level",
+    y = "Percentage of Group") +
+  theme_minimal(base_size = 12) 
+```
+This bar plot visually shows that the distribution of students who prefer python are definitely left skewed, while the distribution of students who prfer R are right skewed. This could support the idea that students who are more comfortable with programming prefer python over R.
