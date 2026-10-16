@@ -1,0 +1,254 @@
+---
+title: "Analysis of class surveys"
+subtitle: "Group 3"
+author: "Baichuan Peng, Pranavi Gandikota, Ryan Chang, Sami Gibson, Shiv Dutta"
+date: "10/15/2026"
+published-title: "Updated"
+editor: visual
+format: html
+code-copy: true
+execute:
+  message: false
+  warning: false
+  echo: false
+  cache: true
+---
+
+```{r}
+# load any other packages and read data here
+library(tidyverse)
+
+background <- read_csv("../data/background-clean.csv")
+interest   <- read_csv("../data/interest-clean.csv")
+
+# 49 students consented to both survey sections
+survey <- inner_join(background, interest, by = "response_id")
+
+lang_colors <- c("Python" = "#3B6FB6", "R" = "#C0392B", "No preference" = "grey60")
+```
+
+## Executive summary
+
+This report explores the relationship between students' academic backgrounds, self-reported proficiency, preferences for programming languages, and project interests using survey data collected from 49 students in PSTAT 197A. We focused on three main questions: whether programming language preference relates to domain interests, whether programming proficiency influences preference for R or Python, and whether students with higher proficiency in mathematics, statistics, and computing are more likely to prefer industry projects. Our results showed that students with no programming language preference tended to have a broader range of domain interests, while students who preferred Python generally reported higher programming comfort than those who preferred R. We also found that students who rated themselves as advanced in all three subjects were slightly less likely to prefer industry projects, although this relationship was not statistically significant. Overall, our findings suggest some interesting patterns in student interests and preferences, but since the data comes from a small sample size and is self-reported the conclusions we can draw are limited.
+
+## Data description
+
+The dataset comes from the class survey conducted for the Data Science Capstone (PSTAT 197A) at the start of Fall 2026. The survey collected information about students' academic backgrounds, technical skills, and interests to better understand the experiences and preferences of students in the class.
+
+- **Sample:** Our analysis included responses from 49 students enrolled in the course. Since the survey was limited to students in one class, the sample may not be representative of the broader student population.
+
+- **Academic background:** Students provided information about their majors and academic backgrounds.
+
+- **Self-reported proficiency:** Students rated their own proficiency in programming, mathematics, and statistics. These ratings reflect students' own perceptions of their abilities rather than standardized assessments.
+
+- **Programming preferences:** Students indicated whether they preferred Python, R, or had no preference.
+
+- **Domain and project interests:** Students selected domains they were interested in (ex: public health, biology, technology, and social sciences). They also indicated their preference for industry or research projects.
+
+- **Data preparation:** The survey responses were organized into two cleaned datasets, `background-clean.csv` and `interest-clean.csv`.
+
+## Questions of interest
+
+We sought to understand how students' self-assessed skills and programming-language preferences relate to the kinds of projects and application domains they are interested in. Our analysis addressed three questions:
+
+1.  Does programming-language preference (R, Python, or no preference) relate to which application domains students are interested in?
+2.  Are students who are more comfortable with programming more likely to prefer Python or R?
+3.  Are students who rate themselves as advanced in statistics, mathematics, and programming more or less likely to prefer an industry project?
+
+## Findings
+
+All tables and figures referenced below appear in the Code chunks, Rendering tables in markdown, and Figures sections that follow.
+
+### 1. Language preference and domain interests
+
+Of the 49 students, 22 prefer Python, 11 prefer R, and 16 have no preference. We kept "No preference" as its own group rather than dropping it, since it turned out to be the most distinctive group. Domain selections were split into individual domains; the seven write-in domains (e.g., AI, Music, Quantitative Finance) were each chosen by only one student, so they are combined as "Other (write-in)".
+
+Students with no language preference selected the most domains on average (5.1, vs. 4.0 for Python and 3.4 for R; @tbl-q1-breadth). The difference is concentrated in the life- and social-science domains (@fig-q1-domains): 75% of no-preference students chose public health (vs. 36% for both Python and R), and they were also the most likely to choose biology, neuroscience, and social or political science. Technology was nearly universal across all three groups (82–95%), and software development was popular across groups as well, with the Python group highest (77%). R-preferring students were the least likely to choose biology (18%).
+
+**Limitation:** with 15 distinct domains and only 11 R-preferring students, each domain share for the R group rests on a handful of students (one student moves a share by about 9 points), so these are descriptive patterns rather than tested differences.
+
+### 2. Programming comfort and R vs. Python
+
+We used self-rated programming comfort (`prog.comf`, observed values 2–5) as the measure of how comfortable students are with programming.
+
+Python-preferring students reported slightly higher comfort on average (3.86) than R-preferring students (3.55; @tbl-q2-comfort), and the Python share grows with comfort (@fig-q2-comfort): Python is chosen by 40% of students at comfort level 3, 43% at level 4, and 71% at level 5. A logistic regression on the 33 students with a preference points the same way (@tbl-q2-model): each one-level increase in comfort multiplies the odds of preferring R by about 0.61, but the effect is not statistically significant (p = 0.30). One side note: the three students who rated their programming *proficiency* as beginner all chose "No preference."
+
+**Limitation:** a third of students (16 of 49) had no language preference and are excluded from the regression, leaving a small sample. Comfort level 2 contains only one student, so its bar should not be over-interpreted.
+
+### 3. Proficiency and industry project preference
+
+We defined a student as "strong" if they rated themselves advanced in all three of statistics, mathematics, and programming. Project type was coded as industry (`ind`) vs. not industry, so students with no preference (`both`) are grouped with research-lab students. We also looked at the number of subjects (0–3) rated advanced to use all of the proficiency information.
+
+Overall, 32 of 49 students (65%) chose an industry project. Among the 11 students advanced in all three subjects, 55% chose industry, compared with 68% of the other 38 students. The share choosing industry declines steadily with the number of subjects rated advanced (70% → 68% → 67% → 55%; @tbl-q3-industry, @fig-q3-industry), and half of the six students who chose a research-lab project rated themselves advanced in all three subjects. However, neither Fisher's exact test (odds ratio 0.56, p = 0.48) nor the logistic regression (odds ratio 0.80 per subject, p = 0.44) shows a statistically significant association (@tbl-q3-tests).
+
+**Limitation:** most students chose industry and only 11 rated themselves advanced in all three subjects, so there is little variation to detect a relationship. Grouping "no preference" with research-lab also blurs the comparison, since those students did not actively choose against industry.
+
+## Useful tips (remove this section)
+
+### Code chunks
+
+Data preparation and models for each question.
+
+```{r}
+#| echo: true
+
+# Q1: split multi-select domains; lump one-off write-ins
+domains_long <- survey %>%
+  select(response_id, language, domains) %>%
+  separate_rows(domains, sep = ", ") %>%
+  mutate(domain = fct_lump_min(domains, min = 2, other_level = "Other (write-in)"))
+
+lang_n <- count(survey, language, name = "group_n")
+
+domain_props <- domains_long %>%
+  distinct(response_id, language, domain) %>%
+  count(language, domain) %>%
+  left_join(lang_n, by = "language") %>%
+  mutate(prop = n / group_n,
+         domain = fct_reorder(domain, n, .fun = sum))
+
+# Q2: logistic regression, R = 1 vs Python = 0 (no-preference excluded)
+lang_model <- survey %>%
+  filter(language %in% c("Python", "R")) %>%
+  mutate(prefer_R = as.integer(language == "R")) %>%
+  glm(prefer_R ~ prog.comf, data = ., family = binomial)
+
+comf_coef <- summary(lang_model)$coefficients["prog.comf", ]
+
+# Q3: industry indicator ("both" and "lab" = not industry) and proficiency counts
+survey <- survey %>%
+  mutate(industry   = type == "ind",
+         n_advanced = (prog.prof == "adv") + (math.prof == "adv") + (stat.prof == "adv"),
+         all_strong = n_advanced == 3)
+
+fisher_res <- fisher.test(table(survey$all_strong, survey$industry))
+ind_model  <- glm(industry ~ n_advanced, data = survey, family = binomial)
+ind_coef   <- summary(ind_model)$coefficients["n_advanced", ]
+```
+
+### Rendering tables in markdown
+
+```{r}
+#| label: tbl-q1-breadth
+#| tbl-cap: Breadth of domain interests by language preference (Q1)
+
+survey %>%
+  mutate(n_domains = str_count(domains, ", ") + 1) %>%
+  group_by(Language = language) %>%
+  summarize(Students = n(),
+            `Mean domains selected` = round(mean(n_domains), 2),
+            `Median domains selected` = median(n_domains)) %>%
+  arrange(desc(`Mean domains selected`)) %>%
+  knitr::kable()
+```
+
+```{r}
+#| label: tbl-q2-comfort
+#| tbl-cap: Programming comfort by language preference (Q2)
+
+survey %>%
+  group_by(Language = language) %>%
+  summarize(Students = n(),
+            `Mean comfort` = round(mean(prog.comf), 2),
+            `Median comfort` = median(prog.comf),
+            SD = round(sd(prog.comf), 2)) %>%
+  knitr::kable()
+```
+
+```{r}
+#| label: tbl-q2-model
+#| tbl-cap: Logistic regression of preferring R (1) vs. Python (0) on programming comfort, n = 33 (Q2)
+
+tibble(Term = "Programming comfort (1 level)",
+       `Log-odds coefficient` = round(comf_coef[["Estimate"]], 3),
+       `Odds ratio` = round(exp(comf_coef[["Estimate"]]), 2),
+       `p-value` = round(comf_coef[["Pr(>|z|)"]], 3)) %>%
+  knitr::kable()
+```
+
+```{r}
+#| label: tbl-q3-industry
+#| tbl-cap: Industry preference by number of subjects rated advanced (Q3)
+
+survey %>%
+  group_by(`Subjects rated advanced` = n_advanced) %>%
+  summarize(Students = n(),
+            `Chose industry` = sum(industry),
+            `Share industry` = scales::percent(mean(industry), accuracy = 0.1)) %>%
+  knitr::kable()
+```
+
+```{r}
+#| label: tbl-q3-tests
+#| tbl-cap: Tests of association between proficiency and industry preference (Q3)
+
+tibble(Test = c("Fisher's exact test (advanced in all 3 vs. not)",
+                "Logistic regression (per additional subject rated advanced)"),
+       `Odds ratio` = round(c(fisher_res$estimate, exp(ind_coef[["Estimate"]])), 2),
+       `p-value` = round(c(fisher_res$p.value, ind_coef[["Pr(>|z|)"]]), 3)) %>%
+  knitr::kable()
+```
+
+### Figures
+
+```{r}
+#| label: fig-q1-domains
+#| fig-width: 7
+#| fig-height: 5
+#| fig-cap: Share of each language group selecting each domain (Q1). Denominators are group sizes (Python n = 22, R n = 11, No preference n = 16).
+
+domain_props %>%
+  ggplot(aes(x = prop, y = domain, fill = language)) +
+  geom_col(position = position_dodge(preserve = "single"), width = 0.75) +
+  scale_x_continuous(labels = scales::percent, limits = c(0, 1)) +
+  scale_fill_manual(values = lang_colors) +
+  labs(x = "Share of language group selecting domain", y = NULL,
+       fill = "Language preference") +
+  theme_minimal(base_size = 11) +
+  theme(legend.position = "bottom")
+```
+
+```{r}
+#| label: fig-q2-comfort
+#| fig-width: 6
+#| fig-height: 4
+#| fig-cap: Language preference within each programming comfort level (Q2). Labels above bars give the number of students at that level.
+
+comf_n <- count(survey, prog.comf)
+
+survey %>%
+  ggplot(aes(x = factor(prog.comf), fill = language)) +
+  geom_bar(position = "fill", width = 0.6) +
+  geom_text(data = comf_n, aes(x = factor(prog.comf), y = 1.04, label = paste0("n = ", n)),
+            inherit.aes = FALSE, size = 3.5) +
+  scale_y_continuous(labels = scales::percent, breaks = seq(0, 1, 0.25)) +
+  scale_fill_manual(values = lang_colors) +
+  labs(x = "Programming comfort level", y = "Share of students",
+       fill = "Language preference") +
+  theme_minimal(base_size = 11)
+```
+
+```{r}
+#| label: fig-q3-industry
+#| fig-width: 5
+#| fig-height: 3.5
+#| fig-cap: Share of students choosing an industry project by number of subjects (statistics, math, programming) rated advanced (Q3).
+
+survey %>%
+  group_by(n_advanced) %>%
+  summarize(k = sum(industry), n = n(), prop = mean(industry)) %>%
+  ggplot(aes(x = factor(n_advanced), y = prop)) +
+  geom_col(fill = "#3B6FB6", width = 0.6) +
+  geom_text(aes(label = paste0(k, "/", n)), vjust = -0.5, size = 3.5) +
+  scale_y_continuous(labels = scales::percent, limits = c(0, 1)) +
+  labs(x = "Number of subjects rated advanced", y = "Share choosing industry") +
+  theme_minimal(base_size = 11)
+```
+
+### Links
+
+- [Question 1 script](../scripts/q1analysis.R)
+- [Question 2 script](../scripts/question2.Rmd)
+- [Question 3 script](../scripts/Question_3_Analysis.R)
+- [Analysis plan](../scripts/analysis-plan.Rmd)
+- [Quarto documentation](https://quarto.org/docs/guide/)
